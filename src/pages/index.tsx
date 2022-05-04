@@ -1,21 +1,72 @@
-import type { NextPage } from 'next';
+import ReactMarkdown from 'react-markdown';
+
+import { gql, GraphQLClient } from 'graphql-request';
 import Head from 'next/head';
 import Image from 'next/image';
 
-import { useGetIssues } from '../hooks/useRequest';
 import styles from '../styles/Home.module.css';
 
-const Home: NextPage = () => {
-  const { data, error, isLoading, isSuccess } = useGetIssues();
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-  if (error) {
-    return <div>Error...</div>;
-  }
-  if (isSuccess) {
-    console.log(data);
-  }
+export async function getStaticProps() {
+  const API_URL = `https://api.github.com/graphql`;
+
+  const graphQLClient = new GraphQLClient(API_URL, {
+    headers: {
+      Authorization: `Bearer ${process.env.API_KEY}`,
+    },
+  });
+  const {
+    repository: {
+      issues: { nodes },
+    },
+  } = await graphQLClient.request(gql`
+    query {
+      repository(name: "articly", owner: "hoangmirs") {
+        issues(first: 10) {
+          nodes {
+            author {
+              login
+            }
+            id
+            title
+            body
+            url
+          }
+          pageInfo {
+            endCursor
+            startCursor
+          }
+          totalCount
+        }
+      }
+    }
+  `);
+
+  console.log(nodes);
+
+  return {
+    props: {
+      issues: nodes as Issue[],
+    },
+  };
+}
+
+interface Author {
+  login: string;
+}
+
+interface Issue {
+  id: string;
+  author: Author;
+  title: string;
+  body: string;
+  url: string;
+}
+
+interface IndexProps {
+  issues: Issue[];
+}
+
+const Home = ({ issues }: IndexProps) => {
   return (
     <div className={styles.container}>
       <Head>
@@ -33,6 +84,19 @@ const Home: NextPage = () => {
           Get started by editing{' '}
           <code className={styles.code}>pages/index.tsx</code>
         </p>
+
+        <div>
+          {issues.map((issue) => (
+            <div className={styles.card} key={issue.id}>
+              <a href={issue.url}>
+                <h2>{issue.title}</h2>
+              </a>
+              <div>
+                <ReactMarkdown>{issue.body}</ReactMarkdown>
+              </div>
+            </div>
+          ))}
+        </div>
 
         <div className={styles.grid}>
           <a href="https://nextjs.org/docs" className={styles.card}>

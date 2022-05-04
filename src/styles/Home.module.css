@@ -80,7 +80,7 @@
 }
 
 .card {
-  max-width: 300px;
+  /* max-width: 300px; */
   margin: 1rem;
   padding: 1.5rem;
 
@@ -94,18 +94,18 @@
   text-decoration: none;
 }
 
-.card:hover,
-.card:focus,
-.card:active {
-  border-color: #0070f3;
-
-  color: #0070f3;
-}
-
-.card h2 {
+.card a {
   margin: 0 0 1rem;
 
   font-size: 1.5rem;
+}
+
+.card a:hover,
+.card a:focus,
+.card a:active {
+  border-color: #0070f3;
+
+  color: #0070f3;
 }
 
 .card p {
