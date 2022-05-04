@@ -2,9 +2,20 @@ import type { NextPage } from 'next';
 import Head from 'next/head';
 import Image from 'next/image';
 
+import { useGetIssues } from '../hooks/useRequest';
 import styles from '../styles/Home.module.css';
 
 const Home: NextPage = () => {
+  const { data, error, isLoading, isSuccess } = useGetIssues();
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+  if (error) {
+    return <div>Error...</div>;
+  }
+  if (isSuccess) {
+    console.log(data);
+  }
   return (
     <div className={styles.container}>
       <Head>
