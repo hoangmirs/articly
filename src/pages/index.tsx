@@ -6,7 +6,7 @@ import Image from 'next/image';
 
 import styles from '../styles/Home.module.css';
 
-export async function getStaticProps() {
+export const getStaticProps = async () => {
   const API_URL = `https://api.github.com/graphql`;
 
   const graphQLClient = new GraphQLClient(API_URL, {
@@ -15,58 +15,98 @@ export async function getStaticProps() {
     },
   });
   const {
-    repository: {
-      issues: { nodes },
-    },
-  } = await graphQLClient.request(gql`
-    query {
-      repository(name: "articly", owner: "hoangmirs") {
-        issues(first: 10) {
-          nodes {
-            author {
-              login
+    repository: { issues },
+  } = await graphQLClient.request(
+    gql`
+      query GetIssues(
+        $owner: String!
+        $name: String!
+        $labels: [String!]
+        $perPage: Int!
+      ) {
+        repository(name: $name, owner: $owner) {
+          issues(first: $perPage, labels: $labels) {
+            nodes {
+              author {
+                login
+              }
+              id
+              title
+              body
+              url
+              labels(first: 100) {
+                nodes {
+                  id
+                  name
+                }
+              }
             }
-            id
-            title
-            body
-            url
+            pageInfo {
+              endCursor
+              startCursor
+            }
+            totalCount
           }
-          pageInfo {
-            endCursor
-            startCursor
-          }
-          totalCount
         }
       }
+    `,
+    {
+      owner: process.env.REPO_OWNER,
+      name: process.env.REPO_NAME,
+      labels: ['question', 'documentation'],
+      perPage: 10,
     }
-  `);
-
-  console.log(nodes);
+  );
 
   return {
     props: {
-      issues: nodes as Issue[],
+      issues: issues as IssuesConnection,
     },
   };
-}
+};
 
-interface Author {
+type Author = {
   login: string;
-}
+  url: string;
+  avatarUrl: string;
+};
 
-interface Issue {
+type IssuesConnection = {
+  nodes: [Issue];
+  pageInfo: PageInfo;
+  totalCount: number;
+};
+
+type Issue = {
   id: string;
   author: Author;
   title: string;
   body: string;
   url: string;
-}
+  labels: {
+    nodes: Label[];
+  };
+  userContentEdits: string[];
+};
+
+type Label = {
+  name: string;
+  color: string;
+  id: string;
+};
+
+type PageInfo = {
+  endCursor: string;
+  startCursor: string;
+};
 
 interface IndexProps {
-  issues: Issue[];
+  issues: IssuesConnection;
 }
 
 const Home = ({ issues }: IndexProps) => {
+  console.log(issues);
+
   return (
     <div className={styles.container}>
       <Head>
@@ -86,13 +126,19 @@ const Home = ({ issues }: IndexProps) => {
         </p>
 
         <div>
-          {issues.map((issue) => (
+          {issues.nodes.map((issue) => (
             <div className={styles.card} key={issue.id}>
               <a href={issue.url}>
                 <h2>{issue.title}</h2>
               </a>
               <div>
                 <ReactMarkdown>{issue.body}</ReactMarkdown>
+              </div>
+
+              <div>
+                {issue.labels.nodes.map((label) => (
+                  <span key={label.id}>{label.name}</span>
+                ))}
               </div>
             </div>
           ))}
