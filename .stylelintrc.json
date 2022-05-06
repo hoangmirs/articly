@@ -1,3 +1,6 @@
 {
-  "extends": "@nimblehq/stylelint-config-nimble"
+  "extends": "@nimblehq/stylelint-config-nimble",
+  "rules": {
+    "selector-class-pattern": null
+  }
 }
