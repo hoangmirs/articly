@@ -1,104 +1,13 @@
-import ReactMarkdown from 'react-markdown';
-
-import { gql, GraphQLClient } from 'graphql-request';
 import Head from 'next/head';
 import Image from 'next/image';
 
-import styles from '../styles/Home.module.css';
-
-export const getStaticProps = async () => {
-  const API_URL = `https://api.github.com/graphql`;
-
-  const graphQLClient = new GraphQLClient(API_URL, {
-    headers: {
-      Authorization: `Bearer ${process.env.API_KEY}`,
-    },
-  });
-  const {
-    repository: { issues },
-  } = await graphQLClient.request(
-    gql`
-      query GetIssues(
-        $owner: String!
-        $name: String!
-        $labels: [String!]
-        $perPage: Int!
-      ) {
-        repository(name: $name, owner: $owner) {
-          issues(first: $perPage, labels: $labels) {
-            nodes {
-              author {
-                login
-              }
-              id
-              title
-              body
-              url
-              labels(first: 100) {
-                nodes {
-                  id
-                  name
-                }
-              }
-            }
-            pageInfo {
-              endCursor
-              startCursor
-            }
-            totalCount
-          }
-        }
-      }
-    `,
-    {
-      owner: process.env.REPO_OWNER,
-      name: process.env.REPO_NAME,
-      labels: ['question', 'documentation'],
-      perPage: 10,
-    }
-  );
-
-  return {
-    props: {
-      issues: issues as IssuesConnection,
-    },
-  };
-};
-
-type Author = {
-  login: string;
-  url: string;
-  avatarUrl: string;
-};
-
-type IssuesConnection = {
-  nodes: [Issue];
-  pageInfo: PageInfo;
-  totalCount: number;
-};
-
-type Issue = {
-  id: string;
-  author: Author;
-  title: string;
-  body: string;
-  url: string;
-  labels: {
-    nodes: Label[];
-  };
-  userContentEdits: string[];
-};
-
-type Label = {
-  name: string;
-  color: string;
-  id: string;
-};
-
-type PageInfo = {
-  endCursor: string;
-  startCursor: string;
-};
+import IssueList from 'components/Issue/IssueList';
+import {
+  GetIssuesQuery,
+  graphQLClient,
+  IssuesConnection,
+} from 'services/issue';
+import styles from 'styles/Home.module.css';
 
 interface IndexProps {
   issues: IssuesConnection;
@@ -116,63 +25,9 @@ const Home = ({ issues }: IndexProps) => {
       </Head>
 
       <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
+        <h1 className={styles.title}>TIL</h1>
 
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.tsx</code>
-        </p>
-
-        <div>
-          {issues.nodes.map((issue) => (
-            <div className={styles.card} key={issue.id}>
-              <a href={issue.url}>
-                <h2>{issue.title}</h2>
-              </a>
-              <div>
-                <ReactMarkdown>{issue.body}</ReactMarkdown>
-              </div>
-
-              <div>
-                {issue.labels.nodes.map((label) => (
-                  <span key={label.id}>{label.name}</span>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h2>Documentation &rarr;</h2>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h2>Learn &rarr;</h2>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/canary/examples"
-            className={styles.card}
-          >
-            <h2>Examples &rarr;</h2>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h2>Deploy &rarr;</h2>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
+        <IssueList issues={issues.nodes} />
       </main>
 
       <footer className={styles.footer}>
@@ -189,6 +44,23 @@ const Home = ({ issues }: IndexProps) => {
       </footer>
     </div>
   );
+};
+
+export const getStaticProps = async () => {
+  const {
+    repository: { issues },
+  } = await graphQLClient.request(GetIssuesQuery, {
+    owner: process.env.REPO_OWNER,
+    name: process.env.REPO_NAME,
+    labels: ['question', 'documentation'],
+    perPage: 10,
+  });
+
+  return {
+    props: {
+      issues: issues as IssuesConnection,
+    },
+  };
 };
 
 export default Home;
