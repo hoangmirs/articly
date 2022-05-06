@@ -26,7 +26,10 @@ const Issue = ({ issue }: IssueProps) => {
   );
 };
 
-export const getServerSideProps: GetServerSideProps = async ({ query }) => {
+export const getServerSideProps: GetServerSideProps = async ({
+  query,
+  res,
+}) => {
   let { id } = query;
 
   if (id === undefined) {
@@ -52,6 +55,11 @@ export const getServerSideProps: GetServerSideProps = async ({ query }) => {
     name: process.env.REPO_NAME,
     number: Number(id),
   });
+
+  res.setHeader(
+    'Cache-Control',
+    'public, s-maxage=10, stale-while-revalidate=59'
+  );
 
   return {
     props: {
