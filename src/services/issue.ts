@@ -1,5 +1,7 @@
 import { gql, GraphQLClient } from 'graphql-request';
 
+import { parseFrontmatter } from './frontmatter';
+
 const API_URL = `https://api.github.com/graphql`;
 
 type Author = {
@@ -25,6 +27,7 @@ type Issue = {
   };
   userContentEdits: string[];
   createdAt: string;
+  number: number;
 };
 
 type Label = {
@@ -38,7 +41,7 @@ type PageInfo = {
   startCursor: string;
 };
 
-const GetIssuesQuery = gql`
+const getIssuesQuery = gql`
   query GetIssues(
     $owner: String!
     $name: String!
@@ -57,6 +60,7 @@ const GetIssuesQuery = gql`
           body
           url
           createdAt
+          number
           labels(first: 100) {
             nodes {
               id
@@ -74,11 +78,64 @@ const GetIssuesQuery = gql`
   }
 `;
 
+const getIssueQuery = gql`
+  query GetIssue($owner: String!, $name: String!, $number: Int!) {
+    repository(name: $name, owner: $owner) {
+      issue(number: $number) {
+        author {
+          login
+          avatarUrl
+        }
+        id
+        title
+        body
+        url
+        createdAt
+        number
+        labels(first: 100) {
+          nodes {
+            id
+            name
+          }
+        }
+      }
+    }
+  }
+`;
+
+const searchIssueNumberQuery = gql`
+  query SearchIssue($query: String!) {
+    search(query: $query, type: ISSUE, first: 1) {
+      nodes {
+        ... on Issue {
+          number
+        }
+      }
+    }
+  }
+`;
+
 const graphQLClient = new GraphQLClient(API_URL, {
   headers: {
     Authorization: `Bearer ${process.env.API_KEY}`,
   },
 });
 
-export { GetIssuesQuery, graphQLClient };
+const getIssueId = (issue: Issue): string => {
+  const id = parseFrontmatter(issue.body).id;
+
+  if (!id) {
+    return issue.number.toString();
+  }
+
+  return id;
+};
+
+export {
+  getIssuesQuery,
+  searchIssueNumberQuery,
+  getIssueQuery,
+  graphQLClient,
+  getIssueId,
+};
 export type { IssuesConnection, Issue, Author, Label, PageInfo };

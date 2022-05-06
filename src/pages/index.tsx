@@ -3,7 +3,7 @@ import Image from 'next/image';
 
 import IssueList from 'components/Issue/IssueList';
 import {
-  GetIssuesQuery,
+  getIssuesQuery,
   graphQLClient,
   IssuesConnection,
 } from 'services/issue';
@@ -14,8 +14,6 @@ interface IndexProps {
 }
 
 const Home = ({ issues }: IndexProps) => {
-  console.log(issues);
-
   return (
     <div className={styles.container}>
       <Head>
@@ -49,7 +47,7 @@ const Home = ({ issues }: IndexProps) => {
 export const getStaticProps = async () => {
   const {
     repository: { issues },
-  } = await graphQLClient.request(GetIssuesQuery, {
+  } = await graphQLClient.request(getIssuesQuery, {
     owner: process.env.REPO_OWNER,
     name: process.env.REPO_NAME,
     labels: ['question', 'documentation'],

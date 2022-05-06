@@ -1,11 +1,13 @@
 import ReactMarkdown from 'react-markdown';
 
+import Link from 'next/link';
 import rehypeRaw from 'rehype-raw';
+import remarkFrontmatter from 'remark-frontmatter';
 import remarkGfm from 'remark-gfm';
 import remarkGithub from 'remark-github';
 
 import CodeBlock from 'components/CodeBlock';
-import type { Issue } from 'services/issue';
+import { getIssueId, Issue } from 'services/issue';
 
 import styles from './IssueCard.module.css';
 
@@ -16,21 +18,22 @@ interface IssueCardProps {
 const IssueCard = ({ issue }: IssueCardProps) => {
   return (
     <article className={styles.container}>
-      <a
-        href={issue.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={styles.title}
-      >
-        <h2>{issue.title}</h2>
-      </a>
+      <Link href={`/[id]`} as={`/${getIssueId(issue)}`}>
+        <h2 className={styles.title}>{issue.title}</h2>
+      </Link>
       <section className={styles.content}>
         <ReactMarkdown
           components={CodeBlock}
           rehypePlugins={[rehypeRaw]}
           remarkPlugins={[
             remarkGfm,
-            [remarkGithub, { repository: 'hoangmirs/articly' }],
+            remarkFrontmatter,
+            [
+              remarkGithub,
+              {
+                repository: `${process.env.REPO_OWNER}/${process.env.REPO_NAME}`,
+              },
+            ],
           ]}
         >
           {issue.body}
