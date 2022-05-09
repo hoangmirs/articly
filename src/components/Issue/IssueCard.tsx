@@ -21,6 +21,9 @@ const IssueCard = ({ issue }: IssueCardProps) => {
       <Link href={`/[id]`} as={`/${getIssueId(issue)}`}>
         <h2 className={styles.title}>{issue.title}</h2>
       </Link>
+      <Link href={issue.url}>
+        <a href={issue.url}>View issue on Github</a>
+      </Link>
       <section className={styles.content}>
         <ReactMarkdown
           components={CodeBlock}
