@@ -1,9 +1,12 @@
-import { GetServerSideProps } from 'next';
+import { GetStaticProps } from 'next';
+import Head from 'next/head';
 import Link from 'next/link';
 
 import IssueCard from 'components/Issue/IssueCard';
 import {
+  getIssueId,
   getIssueQuery,
+  getIssuesQuery,
   graphQLClient,
   Issue,
   searchIssueNumberQuery,
@@ -17,8 +20,12 @@ interface IssueProps {
 const Issue = ({ issue }: IssueProps) => {
   return (
     <main className={styles.main}>
+      <Head>
+        <title>{issue.title}</title>
+      </Head>
+
       <Link href="/">
-        <h1 className={styles.title}>TIL</h1>
+        <h1 className={styles.title}>Articly</h1>
       </Link>
 
       <IssueCard issue={issue} />
@@ -26,15 +33,12 @@ const Issue = ({ issue }: IssueProps) => {
   );
 };
 
-export const getServerSideProps: GetServerSideProps = async ({
-  query,
-  res,
-}) => {
-  let { id } = query;
-
-  if (id === undefined) {
+export const getStaticProps: GetStaticProps = async ({ params }) => {
+  if (params === undefined) {
     return { props: {} };
   }
+
+  let { id } = params;
 
   if (isNaN(Number(id))) {
     const {
@@ -56,16 +60,30 @@ export const getServerSideProps: GetServerSideProps = async ({
     number: Number(id),
   });
 
-  res.setHeader(
-    'Cache-Control',
-    'public, s-maxage=10, stale-while-revalidate=59'
-  );
-
   return {
     props: {
       id,
       issue: issue as Issue,
     },
+    revalidate: 60,
+  };
+};
+
+export const getStaticPaths = async () => {
+  const {
+    repository: { issues },
+  } = await graphQLClient.request(getIssuesQuery, {
+    owner: process.env.REPO_OWNER,
+    name: process.env.REPO_NAME,
+    labels: ['published'],
+    perPage: 100,
+  });
+
+  const paths = issues.nodes.map((issue: Issue) => `/${getIssueId(issue)}`);
+
+  return {
+    paths: paths,
+    fallback: false,
   };
 };
 
