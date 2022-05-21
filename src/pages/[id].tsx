@@ -28,7 +28,7 @@ const Issue = ({ issue }: IssueProps) => {
         <h1 className={styles.title}>Articly</h1>
       </Link>
 
-      <IssueCard issue={issue} />
+      <IssueCard issue={issue} isDetail />
     </main>
   );
 };
