@@ -4,7 +4,9 @@ import Link from 'next/link';
 
 import IssueCard from 'components/Issue/IssueCard';
 import {
+  getIssueId,
   getIssueQuery,
+  getIssuesQuery,
   graphQLClient,
   Issue,
   searchIssueNumberQuery,
@@ -63,7 +65,25 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
       id,
       issue: issue as Issue,
     },
-    revalidate: 60,
+    revalidate: 10,
+  };
+};
+
+export const getStaticPaths = async () => {
+  const {
+    repository: { issues },
+  } = await graphQLClient.request(getIssuesQuery, {
+    owner: process.env.REPO_OWNER,
+    name: process.env.REPO_NAME,
+    labels: ['published'],
+    perPage: 100,
+  });
+
+  const paths = issues.nodes.map((issue: Issue) => `/${getIssueId(issue)}`);
+
+  return {
+    paths: paths,
+    fallback: false,
   };
 };
 
