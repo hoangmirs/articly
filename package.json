@@ -13,6 +13,7 @@
     "codebase:lint": "npm run lint && npm run stylelint"
   },
   "dependencies": {
+    "@giscus/react": "2.0.5",
     "next": "12.1.6",
     "react": "18.1.0",
     "react-dom": "18.1.0"

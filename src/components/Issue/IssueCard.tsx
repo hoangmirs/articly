@@ -1,5 +1,6 @@
 import ReactMarkdown from 'react-markdown';
 
+import Giscus from '@giscus/react';
 import Link from 'next/link';
 import rehypeRaw from 'rehype-raw';
 import remarkFrontmatter from 'remark-frontmatter';
@@ -13,9 +14,31 @@ import styles from './IssueCard.module.css';
 
 interface IssueCardProps {
   issue: Issue;
+  isDetail?: boolean;
 }
 
-const IssueCard = ({ issue }: IssueCardProps) => {
+const IssueCard = ({ issue, isDetail }: IssueCardProps) => {
+  const renderGiscus = () => {
+    if (isDetail) {
+      return (
+        <Giscus
+          id="comments"
+          repo="hoangmirs/articly"
+          repoId="R_kgDOHR5C9Q"
+          category="Giscus"
+          categoryId="DIC_kwDOHR5C9c4CPOOu"
+          mapping="title"
+          reactionsEnabled="1"
+          emitMetadata="0"
+          inputPosition="top"
+          theme="light"
+          lang="en"
+          loading="lazy"
+        />
+      );
+    }
+  };
+
   return (
     <article className={styles.container}>
       <Link href={`/[id]`} as={`/${getIssueId(issue)}`}>
@@ -58,6 +81,7 @@ const IssueCard = ({ issue }: IssueCardProps) => {
           </time>
         </div>
       </section>
+      {renderGiscus()}
     </article>
   );
 };
