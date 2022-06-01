@@ -3,8 +3,10 @@ import Image from 'next/image';
 
 import IssueList from 'components/Issue/IssueList';
 import {
+  getIssueId,
   getIssuesQuery,
   graphQLClient,
+  Issue,
   IssuesConnection,
 } from 'services/issue';
 import styles from 'styles/Home.module.css';
@@ -58,6 +60,26 @@ export const getStaticProps = async () => {
     props: {
       issues: issues as IssuesConnection,
     },
+
+    revalidate: 10,
+  };
+};
+
+export const getStaticPaths = async () => {
+  const {
+    repository: { issues },
+  } = await graphQLClient.request(getIssuesQuery, {
+    owner: process.env.REPO_OWNER,
+    name: process.env.REPO_NAME,
+    labels: ['published'],
+    perPage: 100,
+  });
+
+  const paths = issues.nodes.map((issue: Issue) => `/${getIssueId(issue)}`);
+
+  return {
+    paths: paths,
+    fallback: false,
   };
 };
 
