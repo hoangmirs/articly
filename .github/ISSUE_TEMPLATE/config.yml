@@ -1,31 +1,13 @@
 blank_issues_enabled: false
+
 contact_links:
   - name: Request For Comments (RFC)
-    about: You have an idea on how to improve our processes. Propose your idea so that the team can provide feedback.
-    url: >
-      https://github.com/nimblehq/compass/discussions/new?category=rfcs&body=
-      ## Issue
+    about: When having an idea on how to improve our processes. Propose the idea so that the team can provide feedback.
+    # Set discussion template by using the template query parameters
+    url: https://github.com/nimblehq/compass/discussions/new?category=rfcs&title=RFC:+&body=Refer+to+the+instruction+at+https%3A%2F%2Fnimblehq.co%2Fcompass%2Fintro%2Fchange-management
 
-      Describe the issue the team is currently facing. Provide as much content as possible.
+  - name: Ask a question
+    about: When having a question about a pull request, issue, or problem, create a Q&A discussion to get help from the team.
+    url: https://github.com/nimblehq/compass/discussions/new?category=q-a
 
-      ## Solution
 
-      Describe the solution you are prescribing for the issue
-
-      ## Who Benefits?
-
-      Describe who will be the beneficiaries e.g. everyone, specific chapters, clients...
-
-      ## What's Next?
-
-      Provide an actionable list of things that must happen in order to implement the solution:
-
-      - [ ]
-      - [ ]
-      - [ ]
-
-      Using a poll is encouraged to gather feedback on the RFA 👉 Use this tool: https://gh-polls.com/
-
-  - name: Ask a question related to governance
-    url: https://github.com/kedacore/governance/discussions/new
-    about: Ask a question about the governance of KEDA
