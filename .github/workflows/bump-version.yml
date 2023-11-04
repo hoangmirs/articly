@@ -55,7 +55,7 @@ jobs:
         run: |
           function ver { printf "%03d%03d%03d%03d" $(echo "$1" | tr '.' ' '); }
 
-          if [[ $(ver ${{ steps.develop-version.outputs.version }}) -lt $(ver ${{ steps.main-version.outputs.version }}) ]]; then
+          if [[ $(ver ${{ steps.main-version.outputs.version }}) -gt $(ver ${{ steps.develop-version.outputs.version }}) ]]; then
             delimiter=.
             array=($(echo "${{ steps.develop-version.outputs.version }}" | tr $delimiter '\n'))
 
@@ -88,7 +88,7 @@ jobs:
       - name: Set next version
         id: next-version
         run: |
-          if [[ ${{ github.event.inputs.newVersion }} != 'auto' ]]; then
+          if [[ ${{ github.event_name }} != 'workflow_dispatch' || ${{ github.event.inputs.newVersion }} == 'auto' ]]; then
             echo "version=${{ github.event.inputs.newVersion }}" >> $GITHUB_OUTPUT
           else
             echo "version=${{ needs.set-next-version.outputs.version }}" >> $GITHUB_OUTPUT
