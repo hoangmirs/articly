@@ -88,10 +88,10 @@ jobs:
       - name: Set next version
         id: next-version
         run: |
-          if [[ ${{ github.event_name }} != 'workflow_dispatch' || ${{ github.event.inputs.newVersion }} == 'auto' ]]; then
-            echo "version=${{ github.event.inputs.newVersion }}" >> $GITHUB_OUTPUT
-          else
+          if [ ${{ github.event_name }} != 'workflow_dispatch' ] || [ ${{ github.event.inputs.newVersion }} == 'auto' ]; then
             echo "version=${{ needs.set-next-version.outputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "version=${{ github.event.inputs.newVersion }}" >> $GITHUB_OUTPUT
           fi
 
       - name: Bump version to the next minor version
