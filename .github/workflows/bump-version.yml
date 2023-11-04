@@ -55,7 +55,11 @@ jobs:
         run: |
           function ver { printf "%03d%03d%03d%03d" $(echo "$1" | tr '.' ' '); }
 
+          echo "main version: $(ver ${{ steps.main-version.outputs.version }})"
+          echo "develop version: $(ver ${{ steps.develop-version.outputs.version }})"
+
           if [[ $(ver ${{ steps.main-version.outputs.version }}) -gt $(ver ${{ steps.develop-version.outputs.version }}) ]]; then
+            echo "main version is greater than develop version"
             delimiter=.
             array=($(echo "${{ steps.develop-version.outputs.version }}" | tr $delimiter '\n'))
 
@@ -66,6 +70,7 @@ jobs:
 
             echo "version=$nextVersion" >> $GITHUB_OUTPUT
           else
+            echo "develop version is greater or equal to main version"
             echo "version=${{ steps.main-version.outputs.version }}" >> $GITHUB_OUTPUT
           fi
 
