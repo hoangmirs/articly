@@ -110,6 +110,7 @@ jobs:
         with:
           token: ${{ github.token }}
           branch: chore/bump-version-to-${{ steps.next-version.outputs.version }}
+          base: develop
           delete-branch: true
           title: "[Chore] Bump version to ${{ steps.next-version.outputs.version }}"
           commit-message: "Bump version to ${{ steps.next-version.outputs.version }}"
