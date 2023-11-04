@@ -23,7 +23,7 @@ jobs:
   set-next-version:
     name: Set next version auto
     runs-on: ubuntu-latest
-    if: github.event.inputs.newVersion == 'auto'
+    if: github.event_name != 'workflow_dispatch' || github.event.inputs.newVersion == 'auto'
     outputs:
       version: ${{ steps.set-next-version.outputs.version }}
 
